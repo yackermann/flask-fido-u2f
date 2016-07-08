@@ -46,7 +46,20 @@ class U2F():
         pass    
     
     def verify_counter(self, signature):
-        pass
+        devices = self.get_u2f_devices()
+
+        for device in devices:
+            # Searching for specific keyhandle
+            if device['keyHandle'] == signature['keyHandle']:
+                if counter > device['counter']:
+                    
+                    # Updating counter record
+                    device['counter'] = counter
+                    self.save_u2f_devices(devices)
+                    
+                    return True
+                else:
+                    return False
 
     def read(self, func):
         self.get_u2f_devices = func
