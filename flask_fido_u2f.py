@@ -8,15 +8,17 @@ from u2flib_server.u2f import (start_register, complete_register, start_authenti
 class U2F():
     def __init__(self, app, *args, enroll_route='/enroll', sign_route='/sign'):
 
-        self.app          = app
+        self.app              = app
 
-        self.enroll_route = enroll_route
-        self.sign_route   = sign_route
+        self.enroll_route     = enroll_route
+        self.sign_route       = sign_route
 
         self.get_u2f_devices  = None
         self.save_u2f_devices = None
         self.call_success     = None
         self.call_fail        = None
+
+        self.integrity_check  = False 
 
         if app is not None:
             self.init_app(app)
@@ -25,16 +27,34 @@ class U2F():
         app.add_url_rule(self.enroll_route, view_func = self.enroll, methods=['GET', 'POST'])
         app.add_url_rule(self.sign_route,   view_func = self.sign,   methods=['GET', 'POST'])
 
+    def verify_integrity(self):
+        if not self.integrity_check:
+            if not self.get_u2f_devices:
+                raise Exception("""Read is not defined! Please import read through @u2f.read!""")
+
+            if not self.save_u2f_devices:
+                raise Exception("""Save is not defined! Please import read through @u2f.save!""")
+
+
+            if not self.call_success:
+                raise Exception("""Success is not defined! Please import read through @u2f.success!""")
+
+
+            if not self.call_fail:
+                raise Exception("""Fail is not defined!\n Please import read through @u2f.fail!""")
+
+            self.integrity_check = True
+
     def enroll(self):
+        self.verify_integrity()
         pass
-
     def sign(self):
+        self.verify_integrity()
         pass
-
     # ----- -----#
 
     def get_enroll(self):
-        return self.fail()
+        pass
 
     def verify_enroll(self, signature):
         pass
@@ -61,6 +81,7 @@ class U2F():
                 else:
                     return False
 
+    # ----- Injectors ----- #
     def read(self, func):
         self.get_u2f_devices = func
 
