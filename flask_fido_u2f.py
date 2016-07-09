@@ -106,11 +106,12 @@ class U2F():
         """Provides facets support. REQUIRES VALID HTTPS!!"""
         if self.FACETS_ENABLED:
             data = json.dumps({
-                "trustedFacets" : [{
-                    "version": { "major": 1, "minor" : 0 },
-                    "ids": self.FACETS_LIST
+                'trustedFacets' : [{
+                    'version': { 'major': 1, 'minor' : 0 },
+                    'ids': self.FACETS_LIST
                 }]
-            })
+            }, sort_keys=True, indent=2, separators=(',', ': '))
+
             mime = 'application/fido.trusted-apps+json'
             resp = Response(data, mimetype=mime)
 
