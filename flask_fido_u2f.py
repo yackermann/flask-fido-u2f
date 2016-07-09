@@ -1,4 +1,4 @@
-import json
+import json, time
 
 # Flask imports
 from flask import jsonify, session
@@ -80,7 +80,6 @@ class U2F():
             if not self.call_success:
                 raise Exception('Success is not defined! Please import read through @u2f.success!')
 
-
             if not self.call_fail:
                 raise Exception('Fail is not defined! Please import read through @u2f.fail!')
 
@@ -89,14 +88,28 @@ class U2F():
 # ---- ----- #
     def enroll(self):
         """Enrollment function"""
-        # TODO -> Add enroll timestamp
         self.verify_integrity()
-        pass
+
+        if session.get('u2f_enroll_authorized', False):
+            if request.method == 'GET':
+                pass
+            elif request.method == 'POST':
+                pass
+
+        return jsonify({'status': 'failed', 'error': 'Unauthorized!'}), 401
 
     def sign(self):
         """Signature function"""
         self.verify_integrity()
-        pass
+        
+        if session.get('u2f_sign_required', False):
+            if request.method == 'GET':
+                pass
+            elif request.method == 'POST':
+                pass
+
+        return jsonify({'status': 'failed', 'error': 'Unauthorized!'}), 401
+
 
     def keys(self):
         """Manages users enrolled keys"""
@@ -127,11 +140,29 @@ class U2F():
         enroll  = start_register(self.APPID, devices)
 
         session['_u2f_enroll_'] = enroll.json
-        return enroll.json, 200
+        return enroll.json
 
     def verify_enroll(self, signature):
-        """Verifies enroll data"""
-        pass
+        try:
+            new_device, cert = complete_register(session.pop('_u2f_enroll_'), response,
+                                          self.FACETS_LIST)
+        except Exception as e:
+            # logging.warning('%s User %s failed to provide valid signature! %s', LOG_PREFIX, user.username, str(e))
+            return {'status':'failed', 'error': 'Invalid Challenge!'}
+        finally:
+            pass
+        
+        # Setting new device counter to 0
+        new_device['counter']   = 0
+        new_device['timestamp'] = int(time.time())
+
+        devices = self.get_u2f_devices()
+        devices.append(new_device)
+        
+        self.save_u2f_devices(devices)
+
+        return {'status': 'ok', 'message': 'Successfully enrolled new U2F device!'}
+
 
     def get_signature(self):
         """Returns new signature challenge"""
