@@ -96,7 +96,7 @@ class U2F():
 
             elif request.method == 'POST':
                 response = self.verify_enroll(request.json)
-                
+
                 if response['status'] == 'ok':
                     return jsonify(response), 201
                 else:
@@ -146,7 +146,7 @@ class U2F():
         enroll  = start_register(self.APPID, devices)
 
         session['_u2f_enroll_'] = enroll.json
-        return enroll.json
+        return enroll
 
     def verify_enroll(self, response):
         try:
@@ -154,7 +154,7 @@ class U2F():
                                           self.FACETS_LIST)
         except Exception as e:
             # logging.warning('%s User %s failed to provide valid signature! %s', LOG_PREFIX, user.username, str(e))
-            return {'status':'failed', 'error': 'Invalid Challenge!'}
+            return {'status':'failed', 'error': 'Invalid key handle!'}
         finally:
             pass
         
