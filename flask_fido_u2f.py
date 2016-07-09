@@ -1,4 +1,8 @@
-from flask import jsonify, request, session
+import json
+
+# Flask imports
+from flask import jsonify, session
+from flask import Response
 
 # U2F imports
 from u2flib_server.jsapi import DeviceRegistration
@@ -100,13 +104,17 @@ class U2F():
 
     def facets(self):
         """Provides facets support. REQUIRES VALID HTTPS!!"""
-        if self.app.config['U2F_FACETS_ENABLED']:
-            return jsonify({
+        if self.FACETS_ENABLED:
+            data = json.dumps({
                 "trustedFacets" : [{
                     "version": { "major": 1, "minor" : 0 },
-                    "ids": self.app.config['U2F_FACETS_LIST']
+                    "ids": self.FACETS_LIST
                 }]
             })
+            mime = 'application/fido.trusted-apps+json'
+            resp = Response(data, mimetype=mime)
+
+            return resp, 200
         else:
             return jsonify({}), 404
 
@@ -115,10 +123,10 @@ class U2F():
     def get_enroll(self):
         """Returns new enroll seed"""
         devices = [DeviceRegistration.wrap(device) for device in self.get_u2f_devices()]
-        enroll  = start_register(self.app.config['U2F_APPID'], devices)
+        enroll  = start_register(self.APPID, devices)
 
         session['_u2f_enroll_'] = enroll.json
-        return enroll.json
+        return enroll.json, 200
 
     def verify_enroll(self, signature):
         """Verifies enroll data"""
