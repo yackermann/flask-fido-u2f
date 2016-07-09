@@ -2,7 +2,7 @@ import json, time
 
 # Flask imports
 from flask import jsonify, session
-from flask import Response
+from flask import Response, request
 
 # U2F imports
 from u2flib_server.jsapi import DeviceRegistration
@@ -92,9 +92,15 @@ class U2F():
 
         if session.get('u2f_enroll_authorized', False):
             if request.method == 'GET':
-                pass
+                return jsonify(self.get_enroll()), 200
+
             elif request.method == 'POST':
-                pass
+                response = self.verify_enroll(request.json)
+                
+                if response['status'] == 'ok':
+                    return jsonify(response), 201
+                else:
+                    return jsonify(response), 400
 
         return jsonify({'status': 'failed', 'error': 'Unauthorized!'}), 401
 
@@ -108,7 +114,7 @@ class U2F():
             elif request.method == 'POST':
                 pass
 
-        return jsonify({'status': 'failed', 'error': 'Unauthorized!'}), 401
+        return {'status': 'failed', 'error': 'Unauthorized!'}
 
 
     def keys(self):
@@ -142,7 +148,7 @@ class U2F():
         session['_u2f_enroll_'] = enroll.json
         return enroll.json
 
-    def verify_enroll(self, signature):
+    def verify_enroll(self, response):
         try:
             new_device, cert = complete_register(session.pop('_u2f_enroll_'), response,
                                           self.FACETS_LIST)
