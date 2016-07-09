@@ -6,7 +6,11 @@ from u2flib_server.u2f import (start_register, complete_register, start_authenti
 
 
 class U2F():
-    def __init__(self, app, *args, enroll_route='/enroll', sign_route='/sign', keys_route='/keys', facets_route='/facets.json'):
+    def __init__(self, app, *args
+        , enroll_route = '/enroll'
+        , sign_route   = '/sign'
+        , keys_route   = '/keys'
+        , facets_route = '/facets.json'):
 
         self.app              = app
 
@@ -21,7 +25,6 @@ class U2F():
         self.call_fail        = None
 
         # U2F Variables
-
         self.APPID            = None
         self.FACETS_ENABLED   = False
         self.FACETS_LIST      = None
