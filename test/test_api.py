@@ -116,6 +116,7 @@ class APITest(unittest.TestCase):
         # ----- 201 CREATED ----- #
 
         response = self.client.get('/enroll')
+
         response_json = json.loads(response.get_data(as_text=True))
         
         challenge = response_json['registerRequests'][0]
@@ -147,6 +148,51 @@ class APITest(unittest.TestCase):
 
     def test_signature(self):
         self.u2f_devices = TEST_U2F_DEVICES
+        pass
+
+    def test_facets(self):
+        """Test U2F Facets"""
+
+        # ----- Facets disabled ----- #
+        response = self.client.get('/facets.json')
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+
+
+        # ----- Facets enabled ----- #
+        
+        self.app.config['U2F_FACETS_ENABLED'] = True
+        self.app.config['U2F_FACETS_LIST']    = [
+            'https://security.example.com',
+            'https://example.com',
+        ]
+
+        self.u2f.init_app(self.app)
+
+        response = self.client.get('/facets.json')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers['Content-Type'], 'application/fido.trusted-apps+json')
+
+        response_json = json.loads(response.get_data(as_text=True))
+
+        self.assertDictEqual(response_json, {
+                'trustedFacets' : [{
+                    'version': { 'major': 1, 'minor' : 0 },
+                    'ids': self.app.config['U2F_FACETS_LIST']
+                }]
+        })
+
+        self.app.config['U2F_FACETS_ENABLED'] = True
+        self.app.config['U2F_FACETS_LIST']    = [
+            'https://security.example.com',
+            'https://example.com',
+        ]
+        
+
+    def test_key_management(self):
+        self.u2f_devices = []
         pass
 
 
