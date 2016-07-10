@@ -214,7 +214,3 @@ class APITest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
-# app.config['U2F_APPID']          = 'https://localhost:5000'
-# app.config['U2F_FACETS_ENABLED'] = False
-# app.config['U2F_FACETS_LIST']    = ['https://localhost']
