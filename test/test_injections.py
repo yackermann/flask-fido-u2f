@@ -4,12 +4,12 @@ from flask import Flask, session
 from flask_fido_u2f import U2F
 
 class InjectionAndConfigTest(unittest.TestCase):
+
     def setUp(self):
         self.app      = Flask(__name__)
         self.u2f      = U2F(self.app)
 
-
-    def test_enroll(self):
+    def test_injections(self):
     # ----- Testing general fail ----- #
         with self.assertRaises(Exception) as cm:
             self.u2f.verify_integrity()
