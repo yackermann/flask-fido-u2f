@@ -101,7 +101,9 @@ class APITest(unittest.TestCase):
         challenge = response_json['registerRequests'][0]
         keyhandle = self.u2f_token.register(challenge)
 
-        response = self.client.post(self.u2f.enroll_route, data=json.dumps(keyhandle), headers={"content-type": "application/json"})
+        response = self.client.post(self.u2f.enroll_route, data=json.dumps(keyhandle), headers={
+            'content-type': 'application/json'
+        })
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.headers['Content-Type'], 'application/json')
@@ -123,7 +125,9 @@ class APITest(unittest.TestCase):
 
         keyhandle = self.u2f_token.register(challenge, facet=self.app.config['U2F_APPID'])
 
-        response = self.client.post(self.u2f.enroll_route, data=json.dumps(keyhandle), headers={"content-type": "application/json"})
+        response = self.client.post(self.u2f.enroll_route, data=json.dumps(keyhandle), headers={
+            'content-type': 'application/json'
+        })
 
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.headers['Content-Type'], 'application/json')
@@ -149,9 +153,8 @@ class APITest(unittest.TestCase):
 
     def test_signature(self):
         """Tests U2F signature"""
-        self.u2f_devices = TEST_U2F_DEVICES
         
-        # ----- Checking unauthorized enroll get ----- #
+        # ----- 401 Unauthorized ----- #
         response = self.client.get(self.u2f.sign_route)
 
         self.assertEqual(response.status_code, 401)
@@ -170,6 +173,23 @@ class APITest(unittest.TestCase):
             with c.session_transaction() as sess:
                 sess['u2f_sign_required'] = True
 
+        # ----- 404 Not found ----- #
+        response = self.client.get(self.u2f.sign_route)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        response_json = json.loads(response.get_data(as_text=True))
+
+        self.assertDictEqual(response_json, {
+            'status' : 'failed', 
+            'error'  : 'No keys been associated with the account!'
+        })
+
+        
+
+
+        self.u2f_devices = TEST_U2F_DEVICES
+        # ----- 200 OK ----- #
         # /sign
         response = self.client.get(self.u2f.sign_route)
 
@@ -197,6 +217,7 @@ class APITest(unittest.TestCase):
         self.assertTrue(all(type(response_json['authenticateRequests'][0][key]) == sign_challenge_authenticateRequests[key] for key in sign_challenge_authenticateRequests.keys()))
         
         self.assertEqual(response_json['authenticateRequests'][0]['version'], 'U2F_V2')
+
 
     def test_facets(self):
         """Test U2F Facets"""

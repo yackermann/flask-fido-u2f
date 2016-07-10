@@ -111,10 +111,20 @@ class U2F():
         
         if session.get('u2f_sign_required', False):
             if request.method == 'GET':
-                return jsonify(self.get_signature_challenge()), 200
+                response = self.get_signature_challenge()
+
+                if response['status'] == 'ok':
+                    return jsonify(response), 200
+                else:
+                    return jsonify(response), 404
 
             elif request.method == 'POST':
-                pass
+                response = self.verify_signature(request.json)
+
+                if response['status'] == 'ok':
+                    return jsonify(response), 201
+                else:
+                    return jsonify(response), 400
 
         return jsonify({'status': 'failed', 'error': 'Unauthorized!'}), 401
 
@@ -177,6 +187,13 @@ class U2F():
     def get_signature_challenge(self):
         """Returns new signature challenge"""
         devices   = [DeviceRegistration.wrap(device) for device in self.get_u2f_devices()]
+
+        if devices == []:
+            return {
+                'status' : 'failed', 
+                'error'  : 'No keys been associated with the account!'
+            }
+
         challenge = start_authenticate(devices)
         challenge['status'] = 'ok'
 
