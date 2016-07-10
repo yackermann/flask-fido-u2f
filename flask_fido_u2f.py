@@ -11,16 +11,16 @@ from u2flib_server.u2f import (start_register, complete_register, start_authenti
 
 class U2F():
     def __init__(self, app, *args
-        , enroll_route = '/enroll'
-        , sign_route   = '/sign'
-        , keys_route   = '/devices'
-        , facets_route = '/facets.json'):
+        , enroll_route  = '/enroll'
+        , sign_route    = '/sign'
+        , devices_route = '/devices'
+        , facets_route  = '/facets.json'):
 
         self.app              = app
 
         self.enroll_route     = enroll_route
         self.sign_route       = sign_route
-        self.keys_route       = keys_route
+        self.devices_route    = devices_route
         self.facets_route     = facets_route
 
         self.get_u2f_devices  = None
@@ -39,10 +39,10 @@ class U2F():
             self.init_app(app)
 
     def init_app(self, app):
-        app.add_url_rule(self.enroll_route, view_func = self.enroll, methods=['GET', 'POST'])
-        app.add_url_rule(self.sign_route,   view_func = self.sign,   methods=['GET', 'POST'])
-        app.add_url_rule(self.keys_route,   view_func = self.keys,   methods=['GET', 'DELETE'])
-        app.add_url_rule(self.facets_route, view_func = self.facets, methods=['GET'])
+        app.add_url_rule(self.enroll_route,  view_func = self.enroll,  methods=['GET', 'POST'])
+        app.add_url_rule(self.sign_route,    view_func = self.sign,    methods=['GET', 'POST'])
+        app.add_url_rule(self.devices_route, view_func = self.devices, methods=['GET', 'DELETE'])
+        app.add_url_rule(self.facets_route,  view_func = self.facets,  methods=['GET'])
 
         self.APPID            = self.app.config.get('U2F_APPID', None)
         self.FACETS_ENABLED   = self.app.config.get('U2F_FACETS_ENABLED', False)
@@ -129,13 +129,18 @@ class U2F():
         return jsonify({'status': 'failed', 'error': 'Unauthorized!'}), 401
 
 
-    def keys(self):
-        """Manages users enrolled keys"""
-        if session.get('u2f_allow_key_management', False):
+    def devices(self):
+        """Manages users enrolled u2f devices"""
+        if session.get('u2f_allow_device_management', False):
             if request.method == 'GET':
-                return jsonify(self.get_keys()), 200
+                return jsonify(self.get_devices()), 200
             elif request.method == 'DELETE':
-                pass
+                response = self.remove_device(request.json)
+
+                if response['status'] == 'ok':
+                    return jsonify(response), 200
+                else:
+                    return jsonify(response), 404
 
          return jsonify({'status': 'failed', 'error': 'Unauthorized!'}), 401
 
@@ -199,7 +204,7 @@ class U2F():
         if devices == []:
             return {
                 'status' : 'failed', 
-                'error'  : 'No keys been associated with the account!'
+                'error'  : 'No devices been associated with the account!'
             }
 
         challenge = start_authenticate(devices)
@@ -240,7 +245,7 @@ class U2F():
             }
 
 
-    def get_keys(self):
+    def get_devices(self):
         """Returns list of enrolled U2F devices"""
         return {
             'status'  : 'ok',
@@ -252,11 +257,28 @@ class U2F():
             ]
         }
 
-    def remove_key(self, keyHandle):
-        """Removes key specified by id"""
-        pass
+    def remove_device(self, request):
+        """Removes device specified by id"""
+        
+        devices = self.get_u2f_devices()
 
-    
+
+        for i in range(len(devices)):
+            if devices[i]['keyHandle'] == request.id:
+                del devices[i]
+                self.save_u2f_devices(devices)
+
+                return {
+                    'status'  : 'ok', 
+                    'message' : 'Successfully deleted your device!'
+                }
+
+        return {
+            'status' : 'failed', 
+            'error'  : 'No device with such an id been found!'
+        }
+
+
 # ----- Utilities ----- #
     def verify_certificate(self, signature):
         """FUTURE: if enforced policy, verify certificate in public directory"""
