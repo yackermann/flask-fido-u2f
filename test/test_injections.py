@@ -17,7 +17,7 @@ class InjectionAndConfigTest(unittest.TestCase):
         self.assertEqual(str(cm.exception), 'U2F_APPID was not defined! Please define it in configuration file.')
 
     # ----- Setting U2F_APPID ----- #
-        self.app.config['U2F_APPID'] = 'https://localhost:5000'
+        self.app.config['U2F_APPID'] = 'https://example.com'
 
         self.u2f.init_app(self.app)
 
