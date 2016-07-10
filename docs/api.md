@@ -38,6 +38,7 @@ Get U2F enroll seed
 
         ```javascript
         {
+            status : "ok"
             authenticateRequests: [], 
             registerRequests: [
                 {
@@ -214,6 +215,7 @@ Gets U2F signature challenge
 
         ```javascript
         {
+            status: "ok"
             authenticateRequests: [
                 {
                     challenge : "YYuWW3wJIBqUl-T-Xh1KhtxdE7wtG7lFNEG...", 
