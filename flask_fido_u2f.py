@@ -163,8 +163,10 @@ class U2F():
 
     def verify_enroll(self, response):
         """Verifies and saves U2F enroll"""
+        seed = session.pop('_u2f_enroll_')
+
         try:
-            new_device, cert = complete_register(session.pop('_u2f_enroll_'), response,
+            new_device, cert = complete_register(seed, response,
                                           self.FACETS_LIST)
         except Exception as e:
             # logging.warning('%s User %s failed to provide valid signature! %s', LOG_PREFIX, user.username, str(e))
@@ -203,7 +205,33 @@ class U2F():
 
     def verify_signature(self, signature):
         """Verifies signature"""
-        pass
+
+        devices   = [DeviceRegistration.wrap(device) for device in self.get_u2f_devices()]
+        challenge = session.pop('_u2f_challenge_')
+
+        try:
+            counter, touch = verify_authenticate(devices, challenge, signature, self.FACETS_LIST)
+        except Exception as e:
+            return {
+                'status':'failed', 
+                'error': 'Invalid Signature!'
+            }
+
+        finally:
+            pass
+
+        if self.verify_counter(signature, counter):
+            session['logged_in'] = True
+            return {
+                'status'  : 'ok',
+                'counter' : counter
+            }
+
+        else:
+            return {
+                'status':'failed', 
+                'error': 'Device clone detected!'
+            }
 
 
     def get_keys(self):
@@ -220,7 +248,7 @@ class U2F():
         """FUTURE: if enforced policy, verify certificate in public directory"""
         pass
 
-    def verify_counter(self, signature):
+    def verify_counter(self, signature, counter):
         """ Verifies that counter value is greater than previous signature"""  
         devices = self.get_u2f_devices()
 
