@@ -5,6 +5,17 @@ from flask_fido_u2f import U2F
 
 from .soft_u2f_v2 import SoftU2FDevice
 
+TEST_U2F_DEVICES = [
+    {
+        'keyHandle': '0OGIrhL98eOT4lUoqS4_ep586dC7GGGpVRyfkmEtYCbK_TORJUV9FGslZRafgxnHYLwXXNF4j2o8mhMmoDfurA', 
+        'timestamp': 1468133593, 
+        'publicKey': 'BPr6Kf2bH3hPvrtH4DF0Y2Kl2evIzbDu_htYi3-vfBx-F89rGhIrH_60L1l4pqqBexGRqYWZenbhXaM9O5DYMi0', 
+        'counter': 0, 
+        'appId': 'https://example.com'
+    }
+]
+
+
 class APITest(unittest.TestCase):
     def setUp(self):
         self.app      = Flask(__name__)
@@ -13,18 +24,18 @@ class APITest(unittest.TestCase):
         self.app.config['SECRET_KEY'] = 'DjInNB3l9GBZq2D9IsbBuHpOiLI5H1iBdqJR24VPHdj'
         self.app.config['U2F_APPID']  = 'https://example.com'
 
-        self.u2f       = U2F(self.app)
-        self.u2f_keys  = []
+        self.u2f          = U2F(self.app)
+        self.u2f_devices  = []
 
-        self.u2f_token = SoftU2FDevice()
+        self.u2f_token    = SoftU2FDevice()
 
         @self.u2f.read
         def read():
-            return self.u2f_keys
+            return self.u2f_devices
 
         @self.u2f.save
         def save(u2fdata):
-            self.u2f_keys = u2fdata
+            self.u2f_devices = u2fdata
 
         @self.u2f.success
         def success():
@@ -35,8 +46,11 @@ class APITest(unittest.TestCase):
             pass
 
     def test_enroll(self):
+        """Tests U2F enrollment"""
 
-    # ----- Checking unauthorized enroll get ----- #
+        self.u2f_devices = []
+
+        # ----- Checking unauthorized enroll get ----- #
         response = self.client.get('/enroll')
 
         self.assertEqual(response.status_code, 401)
@@ -48,8 +62,8 @@ class APITest(unittest.TestCase):
             'error'  : 'Unauthorized!'
         })
 
-    # ----- Checking GET enroll structure ----- #
 
+        # ----- Checking GET enroll structure ----- #
         with self.client as c:
             with c.session_transaction() as sess:
                 sess['u2f_enroll_authorized'] = True
@@ -81,9 +95,9 @@ class APITest(unittest.TestCase):
         
         self.assertEqual(response_json['registerRequests'][0]['version'], 'U2F_V2')
 
-    # ----- Verifying enroll ----- #
     
-      # ----- 400 BAD REQUEST ----- #
+        # ----- Verifying enroll ----- #
+        # ----- 400 BAD REQUEST ----- #
         challenge = response_json['registerRequests'][0]
         keyhandle = self.u2f_token.register(challenge)
 
@@ -99,7 +113,7 @@ class APITest(unittest.TestCase):
             'status': 'failed'
         })
 
-    # ----- 201 CREATED ----- #
+        # ----- 201 CREATED ----- #
 
         response = self.client.get('/enroll')
         response_json = json.loads(response.get_data(as_text=True))
@@ -120,7 +134,20 @@ class APITest(unittest.TestCase):
             'message' : 'Successfully enrolled new U2F device!'
         })
 
+        # ----- Testing U2F device format ----- #
+        u2f_device = {
+            'keyHandle' : str,
+            'timestamp' : int,
+            'publicKey' : str,
+            'counter'   : int,
+            'appId'     : str
+        }
 
+        self.assertTrue(all(type(self.u2f_devices[0][key]) == u2f_device[key] for key in u2f_device.keys()))
+
+    def test_signature(self):
+        self.u2f_devices = TEST_U2F_DEVICES
+        pass
 
 
     def tearDown(self):
