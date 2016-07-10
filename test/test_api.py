@@ -163,6 +163,41 @@ class APITest(unittest.TestCase):
             'error'  : 'Unauthorized!'
         })
 
+
+        # ----- Getting challenge -----#
+        
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess['u2f_sign_required'] = True
+
+        # /sign
+        response = self.client.get(self.u2f.sign_route)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+
+        response_json = json.loads(response.get_data(as_text=True))
+
+        sign_challenge_model = {
+            'status'               : str,
+            'authenticateRequests' : list
+        }
+
+        sign_challenge_authenticateRequests = {
+            'challenge' : str,
+            'keyHandle' : str,
+            'appId'     : str,
+            'version'   : str
+        }
+
+        self.assertEqual(response_json['status'], 'ok')
+
+        self.assertTrue(all(type(response_json[key]) == sign_challenge_model[key] for key in sign_challenge_model.keys()))
+
+        self.assertTrue(all(type(response_json['authenticateRequests'][0][key]) == sign_challenge_authenticateRequests[key] for key in sign_challenge_authenticateRequests.keys()))
+        
+        self.assertEqual(response_json['authenticateRequests'][0]['version'], 'U2F_V2')
+
     def test_facets(self):
         """Test U2F Facets"""
 
