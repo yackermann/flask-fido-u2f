@@ -25,15 +25,20 @@ class U2F():
 
         self.get_u2f_devices  = None
         self.save_u2f_devices = None
-        self.call_success     = None
-        self.call_fail        = None
+
+        self.call_success_enroll = None
+        self.call_fail_enroll    = None
+        self.call_success_sign   = None
+        self.call_fail_sign      = None
+        self.call_success        = None
+        self.call_fail           = None
 
         # U2F Variables
-        self.APPID            = None
-        self.FACETS_ENABLED   = False
-        self.FACETS_LIST      = None
+        self.APPID           = None
+        self.FACETS_ENABLED  = False
+        self.FACETS_LIST     = None
 
-        self.integrity_check  = False 
+        self.integrity_check = False 
 
         if app is not None:
             self.init_app(app)
@@ -76,11 +81,17 @@ class U2F():
                 raise Exception('Save is not defined! Please import read through @u2f.save!')
 
 
-            if not self.call_success:
-                raise Exception('Success is not defined! Please import read through @u2f.success!')
+            if not self.call_success_enroll:
+                raise Exception('U2F {name} handler is not defined! Please import {name} through {method}!'.format(name='enroll onSuccess', method='@u2f.enroll_on_success'))
 
-            if not self.call_fail:
-                raise Exception('Fail is not defined! Please import read through @u2f.fail!')
+            if not self.call_fail_enroll:
+                raise Exception('U2F {name} handler is not defined! Please import {name} through {method}!'.format(name='sign onFail', method='@u2f.enroll_on_fail'))
+
+            if not self.call_success_sign:
+                raise Exception('U2F {name} handler is not defined! Please import {name} through {method}!'.format(name='sign onSuccess', method='@u2f.sign_on_success'))
+
+            if not self.call_fail_sign:
+                raise Exception('U2F {name} handler is not defined! Please import {name} through {method}!'.format(name='sign onFail', method='@u2f.sign_on_fail'))
 
             self.integrity_check = True
 
@@ -311,10 +322,18 @@ class U2F():
         """Injects save function that takes U2F object and saves it"""
         self.save_u2f_devices = func
 
-    def success(self, func):
-        """Injects function that would be called on success"""
-        self.call_success = func
+    def enroll_on_success(self, func):
+        """Injects function that would be called on successfull enrollment"""
+        self.call_success_enroll = func
 
-    def fail(self, func):
-        """Injects function that would be called on fail"""
-        self.call_fail = func
+    def enroll_on_fail(self, func):
+        """Injects function that would be called on enrollment failure"""
+        self.call_fail_enroll = func
+
+    def sign_on_success(self, func):
+        """Injects function that would be called on successfull U2F authentication"""
+        self.call_success_sign = func
+
+    def sign_on_fail(self, func):
+        """Injects function that would be called on U2F authentication failure"""
+        self.call_fail_sign = func
