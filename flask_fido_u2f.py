@@ -13,7 +13,7 @@ class U2F():
     def __init__(self, app, *args
         , enroll_route = '/enroll'
         , sign_route   = '/sign'
-        , keys_route   = '/keys'
+        , keys_route   = '/devices'
         , facets_route = '/facets.json'):
 
         self.app              = app
@@ -131,7 +131,13 @@ class U2F():
 
     def keys(self):
         """Manages users enrolled keys"""
-        pass
+        if session.get('u2f_allow_key_management', False):
+            if request.method == 'GET':
+                return jsonify(self.get_keys()), 200
+            elif request.method == 'DELETE':
+                pass
+
+         return jsonify({'status': 'failed', 'error': 'Unauthorized!'}), 401
 
     def facets(self):
         """Provides facets support. REQUIRES VALID HTTPS!!"""
@@ -235,11 +241,19 @@ class U2F():
 
 
     def get_keys(self):
-        """Returns list of enrolled U2F keys"""
-        pass
+        """Returns list of enrolled U2F devices"""
+        return {
+            'status'  : 'ok',
+            'devices' : [
+                {
+                    'id'        : device['keyHandle'],
+                    'timestamp' : device['timestamp']
+                } for device in self.get_u2f_devices()
+            ]
+        }
 
     def remove_key(self, keyHandle):
-        """Removes key specified by keyHandle"""
+        """Removes key specified by id"""
         pass
 
     
