@@ -178,6 +178,8 @@ class U2F():
         """Returns new signature challenge"""
         devices   = [DeviceRegistration.wrap(device) for device in self.get_u2f_devices()]
         challenge = start_authenticate(devices)
+        challenge['status'] = 'ok'
+
         session['_u2f_challenge_'] = challenge.json
 
         return challenge
@@ -185,6 +187,7 @@ class U2F():
     def verify_signature(self, signature):
         """Verifies signature"""
         pass
+
 
     def get_keys(self):
         """Returns list of enrolled U2F keys"""
