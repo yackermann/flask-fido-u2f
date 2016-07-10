@@ -246,10 +246,10 @@ Gets U2F signature challenge
 
     * **Code:** 404 NOT FOUND
         ```javascript
-            {
-                status : "failed", 
-                error  : "No keys been associated with the account!"
-            }
+        {
+            status : "failed", 
+            error  : "No keys been associated with the account!"
+        }
         ```
 
 * **Sample Call:**
