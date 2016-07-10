@@ -11,10 +11,10 @@ from u2flib_server.u2f import (start_register, complete_register, start_authenti
 
 class U2F():
     def __init__(self, app, *args
-        , enroll_route  = '/enroll'
-        , sign_route    = '/sign'
-        , devices_route = '/devices'
-        , facets_route  = '/facets.json'):
+        , enroll_route  = '/u2f/enroll'
+        , sign_route    = '/u2f/sign'
+        , devices_route = '/u2f/devices'
+        , facets_route  = '/u2f/facets.json'):
 
         self.app              = app
 
