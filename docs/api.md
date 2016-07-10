@@ -9,6 +9,10 @@
     * [Get challenge](#get-challenge)
     * [Verify signature](#verify-signature)
 
+* **U2F device management**
+    * [Get devices](#get-devices)
+    * [Delete device](#delete-device)
+
 Enroll
 ___
 
@@ -314,7 +318,7 @@ Verifies users signature
  
 * **Error Response:**
 
-    * **Code:** 400 BAD REQUEST
+    * **Code:** 400 BAD REQUEST - Bad signature
         ```javascript
         {
             status : "failed", 
@@ -322,7 +326,15 @@ Verifies users signature
         }
         ```
     
-    * **Code:** 401 UNAUTHORIZED
+    * **Code:** 400 BAD REQUEST - Device cloning
+        ```javascript
+        {
+            status : "failed", 
+            error  : "Device clone detected!"
+        }
+        ```
+
+    * **Code:** 401 UNAUTHORIZED - Not logged in 
         ```javascript
         {
             status : "failed", 
@@ -362,6 +374,157 @@ Verifies users signature
                     console.log({ 'status': 'failed', 'error': err });
                 })
             })
+        }).catch(function (err) {
+            console.log({ 'status': 'failed', 'error': err });
+        })
+    ```
+
+
+U2F Device management
+---
+
+**Get devices**
+----
+Gets list of your U2F devices
+
+* **URL**
+
+    * `/devices`
+
+* **Method:**
+
+     * `GET`
+    
+*  **URL Params**
+
+    * None
+
+* **Data Params**
+
+    * None
+
+* **Success Response:**
+
+    * **Code:** 200 OK
+
+        ```javascript
+        {
+            status  : 'ok',
+            devices : [
+                {
+                    id        : "Jo_q_IxHKq5AzEheueRVrzltnVDOqjbGD2Z...",
+                    timestamp : 1468145352
+                },
+                {
+                    id        : "bmmSN2Ur8vT4LpoQuVLx5avRfo17ZZzVjxr...",
+                    timestamp : 1468121632
+                }
+                ...
+            ]
+        }
+        ```
+ 
+* **Error Response:**
+    
+    * **Code:** 401 UNAUTHORIZED
+        ```javascript
+        {
+            status : "failed", 
+            error  : "Unauthorized!"
+        }
+        ```
+
+* **Sample Call:**
+    ```javascript
+        fetch('/devices', {
+            method  : 'GET',
+            credentials : 'same-origin',
+            headers : {
+                'Accept'       : 'application/json',
+                'Content-Type' : 'application/json'
+            }
+        }).then(function (response) {
+            return response.json();
+        }).then(function (response) {
+            var devices = response.devices;
+            for(var i = 0; i < devices.length; i++)
+                console.log(devices[i])
+
+        }).catch(function (err) {
+            console.log({ 'status': 'failed', 'error': err });
+        })
+    ```
+
+**Delete device**
+----
+Deletes U2F device
+
+* **URL**
+
+    * `/devices`
+
+* **Method:**
+
+     * `DELETE`
+    
+*  **URL Params**
+
+    * None
+
+* **Data Params**
+
+    ```javascript
+    {
+        id : "Jo_q_IxHKq5AzEheueRVrzltnVDOqjbGD2ZGoj..."
+    }
+    ```
+
+* **Success Response:**
+
+    * **Code:** 200 OK
+
+        ```javascript
+        {
+            status  : "ok", 
+            message : "Successfully deleted your device!"
+        }
+        ```
+ 
+* **Error Response:**
+
+     * **Code:** 401 UNAUTHORIZED
+        ```javascript
+        {
+            status : "failed", 
+            error  : "Unauthorized!"
+        }
+        ```
+
+    * **Code:** 404 NOT FOUND - No device with such an id been found
+        ```javascript
+        {
+            status : "failed", 
+            error  : "No device with such an id been found!"
+        }
+        ```
+
+
+* **Sample Call:**
+    ```javascript
+        fetch('/sign', {
+            method  : 'DELETE',
+            credentials : 'same-origin',
+            body: JSON.stringify({
+                id : "Jo_q_IxHKq5AzEheueRVrzltnVDOqjbGD2ZGoj..."
+            }),
+            headers : {
+                'Accept'       : 'application/json',
+                'Content-Type' : 'application/json'
+            }
+        }).then(function (response) {
+            return response.json();
+        }).then(function (response) {
+            console.log(response)
         }).catch(function (err) {
             console.log({ 'status': 'failed', 'error': err });
         })
