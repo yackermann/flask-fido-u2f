@@ -52,7 +52,6 @@ class U2F():
         # or U2F_APP becomes U2F_FACETS_LIST
         if self.FACETS_ENABLED:
             self.APPID += '/facets.json'
-            assert len(self.FACETS_LIST) > 0
         else:
             self.FACETS_LIST = [self.APPID]
 
@@ -85,6 +84,8 @@ class U2F():
 
             self.integrity_check = True
 
+        return True
+
 # ---- ----- #
     def enroll(self):
         """Enrollment function"""
@@ -110,11 +111,12 @@ class U2F():
         
         if session.get('u2f_sign_required', False):
             if request.method == 'GET':
-                pass
+                return jsonify(self.get_signature_challenge()), 200
+
             elif request.method == 'POST':
                 pass
 
-        return {'status': 'failed', 'error': 'Unauthorized!'}
+        return jsonify({'status': 'failed', 'error': 'Unauthorized!'}), 401
 
 
     def keys(self):
@@ -144,11 +146,13 @@ class U2F():
         """Returns new enroll seed"""
         devices = [DeviceRegistration.wrap(device) for device in self.get_u2f_devices()]
         enroll  = start_register(self.APPID, devices)
+        enroll['status'] = 'ok'
 
         session['_u2f_enroll_'] = enroll.json
         return enroll
 
     def verify_enroll(self, response):
+        """Verifies and saves U2F enroll"""
         try:
             new_device, cert = complete_register(session.pop('_u2f_enroll_'), response,
                                           self.FACETS_LIST)
@@ -170,9 +174,13 @@ class U2F():
         return {'status': 'ok', 'message': 'Successfully enrolled new U2F device!'}
 
 
-    def get_signature(self):
+    def get_signature_challenge(self):
         """Returns new signature challenge"""
-        pass
+        devices   = [DeviceRegistration.wrap(device) for device in self.get_u2f_devices()]
+        challenge = start_authenticate(devices)
+        session['_u2f_challenge_'] = challenge.json
+
+        return challenge
 
     def verify_signature(self, signature):
         """Verifies signature"""
