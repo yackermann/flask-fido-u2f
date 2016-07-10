@@ -51,7 +51,7 @@ class APITest(unittest.TestCase):
         self.u2f_devices = []
 
         # ----- Checking unauthorized enroll get ----- #
-        response = self.client.get('/enroll')
+        response = self.client.get(self.u2f.enroll_route)
 
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.headers['Content-Type'], 'application/json')
@@ -68,7 +68,7 @@ class APITest(unittest.TestCase):
             with c.session_transaction() as sess:
                 sess['u2f_enroll_authorized'] = True
 
-        response = self.client.get('/enroll')
+        response = self.client.get(self.u2f.enroll_route)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.headers['Content-Type'], 'application/json')
@@ -101,7 +101,7 @@ class APITest(unittest.TestCase):
         challenge = response_json['registerRequests'][0]
         keyhandle = self.u2f_token.register(challenge)
 
-        response = self.client.post('/enroll', data=json.dumps(keyhandle), headers={"content-type": "application/json"})
+        response = self.client.post(self.u2f.enroll_route, data=json.dumps(keyhandle), headers={"content-type": "application/json"})
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.headers['Content-Type'], 'application/json')
@@ -115,7 +115,7 @@ class APITest(unittest.TestCase):
 
         # ----- 201 CREATED ----- #
 
-        response = self.client.get('/enroll')
+        response = self.client.get(self.u2f.enroll_route)
 
         response_json = json.loads(response.get_data(as_text=True))
         
@@ -123,7 +123,7 @@ class APITest(unittest.TestCase):
 
         keyhandle = self.u2f_token.register(challenge, facet=self.app.config['U2F_APPID'])
 
-        response = self.client.post('/enroll', data=json.dumps(keyhandle), headers={"content-type": "application/json"})
+        response = self.client.post(self.u2f.enroll_route, data=json.dumps(keyhandle), headers={"content-type": "application/json"})
 
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.headers['Content-Type'], 'application/json')
@@ -146,9 +146,22 @@ class APITest(unittest.TestCase):
 
         self.assertTrue(all(type(self.u2f_devices[0][key]) == u2f_device[key] for key in u2f_device.keys()))
 
+
     def test_signature(self):
+        """Tests U2F signature"""
         self.u2f_devices = TEST_U2F_DEVICES
-        pass
+        
+        # ----- Checking unauthorized enroll get ----- #
+        response = self.client.get(self.u2f.sign_route)
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        response_json = json.loads(response.get_data(as_text=True))
+
+        self.assertDictEqual(response_json, {
+            'status' : 'failed', 
+            'error'  : 'Unauthorized!'
+        })
 
     def test_facets(self):
         """Test U2F Facets"""
