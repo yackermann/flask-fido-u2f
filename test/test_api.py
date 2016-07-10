@@ -166,7 +166,6 @@ class APITest(unittest.TestCase):
             'error'  : 'Unauthorized!'
         })
 
-
         # ----- Getting challenge -----#
         
         with self.client as c:
@@ -182,10 +181,8 @@ class APITest(unittest.TestCase):
 
         self.assertDictEqual(response_json, {
             'status' : 'failed', 
-            'error'  : 'No keys been associated with the account!'
+            'error'  : 'No devices been associated with the account!'
         })
-
-        
 
 
         self.u2f_devices = TEST_U2F_DEVICES
@@ -260,7 +257,7 @@ class APITest(unittest.TestCase):
         ]
         
 
-    def test_key_management(self):
+    def test_device_management(self):
         self.u2f_devices = []
         pass
 

@@ -252,7 +252,7 @@ Gets U2F signature challenge
         ```javascript
         {
             status : "failed", 
-            error  : "No keys been associated with the account!"
+            error  : "No devices been associated with the account!"
         }
         ```
 
@@ -268,10 +268,10 @@ Gets U2F signature challenge
         }).then(function (response) {
             return response.json();
         }).then(function (response) {
-            var keys = response.authenticateRequests;
-            var challenge = keys[0].challenge;
-            var appId = keys[0].appId;
-            u2f.sign(appId, challenge, keys, function(deviceResponse) {
+            var devices = response.authenticateRequests;
+            var challenge = devices[0].challenge;
+            var appId = devices[0].appId;
+            u2f.sign(appId, challenge, devices, function(deviceResponse) {
                 console.log(deviceResponse)
             })
         }).catch(function (err) {
@@ -354,10 +354,10 @@ Verifies users signature
         }).then(function (response) {
             return response.json();
         }).then(function (response) {
-            var keys = response.authenticateRequests;
-            var challenge = keys[0].challenge;
-            var appId = keys[0].appId;
-            u2f.sign(appId, challenge, keys, function(deviceResponse) {
+            var devices = response.authenticateRequests;
+            var challenge = devices[0].challenge;
+            var appId = devices[0].appId;
+            u2f.sign(appId, challenge, devices, function(deviceResponse) {
                 fetch('/sign', {
                     method  : 'POST',
                     credentials : 'same-origin',
