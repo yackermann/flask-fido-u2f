@@ -37,7 +37,7 @@ class InjectionAndConfigTest(unittest.TestCase):
 
         self.assertIn('U2F facets been enabled, but U2F facet list is empty.', str(cm.exception))
 
-   #  # ----- Making empty U2F_FACETS_LIST ----- #
+   # ----- Making empty U2F_FACETS_LIST ----- #
         self.app.config['U2F_FACETS_LIST'] = []
 
         self.u2f.init_app(self.app)
