@@ -251,7 +251,7 @@ class APITest(unittest.TestCase):
 
         # Good signature
 
-        response     = self.client.get(self.u2f.sign_route)
+        response      = self.client.get(self.u2f.sign_route)
         response_json = json.loads(response.get_data(as_text=True))
 
         # Saving old counter for checking counter value increase
@@ -275,7 +275,7 @@ class APITest(unittest.TestCase):
         }.items()).issubset(set(response_json.items())))
 
         self.assertGreater(response_json['counter'], old_counter)
-        
+
     def test_facets(self):
         """Test U2F Facets"""
 
@@ -310,12 +310,103 @@ class APITest(unittest.TestCase):
         })
 
     def test_device_management(self):
-        self.u2f_devices = []
-        pass
 
+        # ----- 401 Unauthorized ----- #
+        response = self.client.get(self.u2f.devices_route)
 
-    def tearDown(self):
-        pass
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        response_json = json.loads(response.get_data(as_text=True))
+
+        self.assertDictEqual(response_json, {
+            'status' : 'failed', 
+            'error'  : 'Unauthorized!'
+        })
+
+        # ----- Enabling access to device managment ----- #
+        
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess['u2f_allow_device_management'] = True
+
+        # ----- No keys enrolled ----- #
+
+        response = self.client.get(self.u2f.devices_route)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        response_json = json.loads(response.get_data(as_text=True))
+
+        self.assertDictEqual(response_json, {
+            'status'  : 'ok',
+            'devices' : []
+        })
+
+        # ----- Creating new enroll ----- #
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess['u2f_enroll_authorized'] = True
+
+        enroll_response = self.client.get(self.u2f.enroll_route)
+        enroll_response_json = json.loads(enroll_response.get_data(as_text=True))
+        
+        challenge = enroll_response_json['registerRequests'][0]
+        keyhandle = self.u2f_token.register(challenge, facet=self.app.config['U2F_APPID'])
+
+        response  = self.client.post(self.u2f.enroll_route, data=json.dumps(keyhandle), headers={
+            'content-type': 'application/json'
+        })
+        # ----- New enroll END ----- #
+
+        response = self.client.get(self.u2f.devices_route)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        response_json = json.loads(response.get_data(as_text=True))
+
+        device = response_json['devices'][0]
+
+        device_model = {
+            'id'        : str,
+            'timestamp' : int
+        }
+
+        self.assertTrue(all(type(device[key]) == device_model[key] for key in device_model.keys()))
+
+        # ----- Delete Fail----- #
+        
+        device_to_delete_fail = {
+            'id' : 'NoExactlyValidID'
+        }
+
+        response = self.client.delete(self.u2f.devices_route, data=json.dumps(device_to_delete_fail), headers={ 'content-type': 'application/json' })
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        response_json = json.loads(response.get_data(as_text=True))
+
+        self.assertDictEqual(response_json, {
+            'status' : 'failed', 
+            'error'  : 'No device with such an id been found!'
+        })
+
+        # ----- Delete Success----- #
+        
+        device_to_delete = device
+
+        response = self.client.delete(self.u2f.devices_route, data=json.dumps(device_to_delete), headers={ 'content-type': 'application/json' })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+        response_json = json.loads(response.get_data(as_text=True))
+
+        self.assertDictEqual(response_json, {
+            'status'  : 'ok', 
+            'message' : 'Successfully deleted your device!'
+        })
+
+        self.assertEqual([], self.u2f_devices)
 
 if __name__ == '__main__':
     unittest.main()
