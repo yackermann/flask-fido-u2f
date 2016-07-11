@@ -250,7 +250,7 @@ class U2F():
         except Exception as e:
             return {
                 'status':'failed', 
-                'error': 'Invalid Signature!'
+                'error': 'Invalid signature!'
             }
 
             self.call_fail_sign()
@@ -259,7 +259,8 @@ class U2F():
             session['logged_in'] = True
             return {
                 'status'  : 'ok',
-                'counter' : counter
+                'counter' : counter,
+                'message': 'Successfully verified your second factor!'
             }
 
             self.call_success_sign()
