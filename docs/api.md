@@ -409,7 +409,7 @@ Gets list of your U2F devices
 
         ```javascript
         {
-            status  : 'ok',
+            status  : "ok",
             devices : [
                 {
                     id        : "Jo_q_IxHKq5AzEheueRVrzltnVDOqjbGD2Z...",
