@@ -150,6 +150,7 @@ class U2F():
         if session.get('u2f_allow_device_management', False):
             if request.method == 'GET':
                 return jsonify(self.get_devices()), 200
+
             elif request.method == 'DELETE':
                 response = self.remove_device(request.json)
 
@@ -292,10 +293,10 @@ class U2F():
         devices = self.get_u2f_devices()
 
         for i in range(len(devices)):
-            if devices[i]['keyHandle'] == request.id:
+            if devices[i]['keyHandle'] == request['id']:
                 del devices[i]
                 self.save_u2f_devices(devices)
-
+                
                 return {
                     'status'  : 'ok', 
                     'message' : 'Successfully deleted your device!'
