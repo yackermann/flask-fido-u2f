@@ -158,7 +158,7 @@ class U2F():
         return jsonify({'status': 'failed', 'error': 'Unauthorized!'}), 401
 
     def facets(self):
-        """Provides facets support. REQUIRES VALID HTTPS!!"""
+        """Provides facets support. REQUIRES VALID HTTPS!"""
         self.verify_integrity()
 
         if self.FACETS_ENABLED:
@@ -192,13 +192,16 @@ class U2F():
         """Verifies and saves U2F enroll"""
 
         seed = session.pop('_u2f_enroll_')
-
         try:
-            new_device, cert = complete_register(seed, response,
-                                          self.FACETS_LIST)
+            new_device, cert = complete_register(seed, response, self.FACETS_LIST)
         except Exception as e:
-            # logging.warning('%s User %s failed to provide valid signature! %s', LOG_PREFIX, user.username, str(e))
-            return {'status':'failed', 'error': 'Invalid key handle!'}
+            self.call_fail_enroll()
+
+            return {
+                'status' : 'failed', 
+                'error'  : 'Invalid key handle!'
+            }
+
         finally:
             pass
         
@@ -208,8 +211,9 @@ class U2F():
 
         devices = self.get_u2f_devices()
         devices.append(new_device)
-        
         self.save_u2f_devices(devices)
+        
+        self.call_success_enroll()
 
         return {'status': 'ok', 'message': 'Successfully enrolled new U2F device!'}
 
@@ -246,8 +250,7 @@ class U2F():
                 'error': 'Invalid Signature!'
             }
 
-        finally:
-            pass
+            self.call_fail_sign()
 
         if self.verify_counter(signature, counter):
             session['logged_in'] = True
@@ -256,12 +259,15 @@ class U2F():
                 'counter' : counter
             }
 
+            self.call_success_sign()
+
         else:
             return {
                 'status':'failed', 
                 'error': 'Device clone detected!'
             }
 
+            self.call_fail_sign()
 
     def get_devices(self):
         """Returns list of enrolled U2F devices"""
@@ -304,7 +310,7 @@ class U2F():
 
     def verify_counter(self, signature, counter):
         """ Verifies that counter value is greater than previous signature""" 
-         
+
         devices = self.get_u2f_devices()
 
         for device in devices:
