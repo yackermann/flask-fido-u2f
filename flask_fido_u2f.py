@@ -153,7 +153,7 @@ class U2F():
                 else:
                     return jsonify(response), 404
 
-         return jsonify({'status': 'failed', 'error': 'Unauthorized!'}), 401
+        return jsonify({'status': 'failed', 'error': 'Unauthorized!'}), 401
 
     def facets(self):
         """Provides facets support. REQUIRES VALID HTTPS!!"""
