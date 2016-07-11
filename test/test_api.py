@@ -5,17 +5,6 @@ from flask_fido_u2f import U2F
 
 from .soft_u2f_v2 import SoftU2FDevice
 
-TEST_U2F_DEVICES = [
-    {
-        'keyHandle': '0OGIrhL98eOT4lUoqS4_ep586dC7GGGpVRyfkmEtYCbK_TORJUV9FGslZRafgxnHYLwXXNF4j2o8mhMmoDfurA', 
-        'timestamp': 1468133593, 
-        'publicKey': 'BPr6Kf2bH3hPvrtH4DF0Y2Kl2evIzbDu_htYi3-vfBx-F89rGhIrH_60L1l4pqqBexGRqYWZenbhXaM9O5DYMi0', 
-        'counter': 0, 
-        'appId': 'https://example.com'
-    }
-]
-
-
 class APITest(unittest.TestCase):
     def setUp(self):
         self.app      = Flask(__name__)
@@ -162,7 +151,7 @@ class APITest(unittest.TestCase):
 
     def test_signature(self):
         """Tests U2F signature"""
-        
+
         # ----- 401 Unauthorized ----- #
         response = self.client.get(self.u2f.sign_route)
 
@@ -193,10 +182,24 @@ class APITest(unittest.TestCase):
             'error'  : 'No devices been associated with the account!'
         })
 
+        # ----- Creating new enroll ----- #
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess['u2f_enroll_authorized'] = True
 
-        self.u2f_devices = TEST_U2F_DEVICES
+        enroll_response = self.client.get(self.u2f.enroll_route)
+        enroll_response_json = json.loads(enroll_response.get_data(as_text=True))
+        
+        challenge = enroll_response_json['registerRequests'][0]
+        keyhandle = self.u2f_token.register(challenge, facet=self.app.config['U2F_APPID'])
+
+        response  = self.client.post(self.u2f.enroll_route, data=json.dumps(keyhandle), headers={
+            'content-type': 'application/json'
+        })
+        # ----- New enroll END ----- #
+    
         # ----- 200 OK ----- #
-        # /sign
+        # /u2f/sign
         response = self.client.get(self.u2f.sign_route)
 
         self.assertEqual(response.status_code, 200)
@@ -224,7 +227,55 @@ class APITest(unittest.TestCase):
         
         self.assertEqual(response_json['authenticateRequests'][0]['version'], 'U2F_V2')
 
+        # ----- Getting signature ----- #
+        # Bad signature
+        response = self.client.get(self.u2f.sign_route)
+        response_json = json.loads(response.get_data(as_text=True))
 
+        challenge = response_json['authenticateRequests'][0]
+        signature = self.u2f_token.getAssertion(challenge)
+
+        response = self.client.post(self.u2f.sign_route, data=json.dumps(signature), headers={
+            'content-type': 'application/json'
+        })
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+
+        response_json = json.loads(response.get_data(as_text=True))
+
+        self.assertDictEqual(response_json, {
+            'error': 'Invalid signature!', 
+            'status': 'failed'
+        })
+
+        # Good signature
+
+        response     = self.client.get(self.u2f.sign_route)
+        response_json = json.loads(response.get_data(as_text=True))
+
+        # Saving old counter for checking counter value increase
+        old_counter = self.u2f_devices[0]['counter']
+
+        challenge = response_json['authenticateRequests'][0]
+        signature = self.u2f_token.getAssertion(challenge, facet=self.app.config['U2F_APPID'])
+
+        response = self.client.post(self.u2f.sign_route, data=json.dumps(signature), headers={
+            'content-type': 'application/json'
+        })
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.headers['Content-Type'], 'application/json')
+
+        response_json = json.loads(response.get_data(as_text=True))
+
+        self.assertTrue(set({
+            'status'  : 'ok', 
+            'message' : 'Successfully verified your second factor!'
+        }.items()).issubset(set(response_json.items())))
+
+        self.assertGreater(response_json['counter'], old_counter)
+        
     def test_facets(self):
         """Test U2F Facets"""
 
