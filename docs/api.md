@@ -22,7 +22,7 @@ Get U2F enroll seed
 
 * **URL**
 
-    * `/enroll`
+    * `/u2f/enroll`
 
 * **Method:**
 
@@ -68,7 +68,7 @@ Get U2F enroll seed
 * **Sample Call:**
 
     ```javascript
-        fetch('/enroll', {
+        fetch('/u2f/enroll', {
             method  : 'GET',
             credentials : 'same-origin',
             headers : {
@@ -99,7 +99,7 @@ Verifies U2F enroll
 
 * **URL**
 
-    * `/enroll`
+    * `/u2f/enroll`
 
 * **Method:**
 
@@ -152,7 +152,7 @@ Verifies U2F enroll
 
 * **Sample Call:**
     ```javascript
-        fetch('/enroll', {
+        fetch('/u2f/enroll', {
             method  : 'GET',
             credentials : 'same-origin',
             headers : {
@@ -169,7 +169,7 @@ Verifies U2F enroll
            
             // Formating Challenge
             u2f.register(appid, enroll, sign, function(deviceResponse) {
-                fetch('/enroll', {
+                fetch('/u2f/enroll', {
                     method  : 'POST',
                     credentials : 'same-origin',
                     body : JSON.stringify(deviceResponse),
@@ -199,7 +199,7 @@ Gets U2F signature challenge
 
 * **URL**
 
-    * `/sign`
+    * `/u2f/sign`
 
 * **Method:**
 
@@ -258,7 +258,7 @@ Gets U2F signature challenge
 
 * **Sample Call:**
     ```javascript
-        fetch('/sign', {
+        fetch('/u2f/sign', {
             method  : 'GET',
             credentials : 'same-origin',
             headers : {
@@ -285,7 +285,7 @@ Verifies users signature
 
 * **URL**
 
-    * `/sign`
+    * `/u2f/sign`
 
 * **Method:**
 
@@ -344,7 +344,7 @@ Verifies users signature
 
 * **Sample Call:**
     ```javascript
-        fetch('/sign', {
+        fetch('/u2f/sign', {
             method  : 'GET',
             credentials : 'same-origin',
             headers : {
@@ -358,7 +358,7 @@ Verifies users signature
             var challenge = devices[0].challenge;
             var appId = devices[0].appId;
             u2f.sign(appId, challenge, devices, function(deviceResponse) {
-                fetch('/sign', {
+                fetch('/u2f/sign', {
                     method  : 'POST',
                     credentials : 'same-origin',
                     body : JSON.stringify(deviceResponse),
@@ -389,7 +389,7 @@ Gets list of your U2F devices
 
 * **URL**
 
-    * `/devices`
+    * `/u2f/devices`
 
 * **Method:**
 
@@ -436,7 +436,7 @@ Gets list of your U2F devices
 
 * **Sample Call:**
     ```javascript
-        fetch('/devices', {
+        fetch('/u2f/devices', {
             method  : 'GET',
             credentials : 'same-origin',
             headers : {
@@ -461,7 +461,7 @@ Deletes U2F device
 
 * **URL**
 
-    * `/devices`
+    * `/u2f/devices`
 
 * **Method:**
 
@@ -511,7 +511,7 @@ Deletes U2F device
 
 * **Sample Call:**
     ```javascript
-        fetch('/sign', {
+        fetch('/u2f/sign', {
             method  : 'DELETE',
             credentials : 'same-origin',
             body: JSON.stringify({
