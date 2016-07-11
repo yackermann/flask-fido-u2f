@@ -74,24 +74,27 @@ class U2F():
                                 """)
 
             # Injection
+            
+            undefined_message = 'U2F {name} handler is not defined! Please import {name} through {method}!'
+
             if not self.get_u2f_devices:
-                raise Exception('Read is not defined! Please import read through @u2f.read!')
+                raise Exception(undefined_message.format(name='Read', method='@u2f.read'))
 
             if not self.save_u2f_devices:
-                raise Exception('Save is not defined! Please import read through @u2f.save!')
+                raise Exception(undefined_message.format(name='Save', method='@u2f.save'))
 
 
             if not self.call_success_enroll:
-                raise Exception('U2F {name} handler is not defined! Please import {name} through {method}!'.format(name='enroll onSuccess', method='@u2f.enroll_on_success'))
+                raise Exception(undefined_message.format(name='enroll onSuccess', method='@u2f.enroll_on_success'))
 
             if not self.call_fail_enroll:
-                raise Exception('U2F {name} handler is not defined! Please import {name} through {method}!'.format(name='sign onFail', method='@u2f.enroll_on_fail'))
+                raise Exception(undefined_message.format(name='sign onFail', method='@u2f.enroll_on_fail'))
 
             if not self.call_success_sign:
-                raise Exception('U2F {name} handler is not defined! Please import {name} through {method}!'.format(name='sign onSuccess', method='@u2f.sign_on_success'))
+                raise Exception(undefined_message.format(name='sign onSuccess', method='@u2f.sign_on_success'))
 
             if not self.call_fail_sign:
-                raise Exception('U2F {name} handler is not defined! Please import {name} through {method}!'.format(name='sign onFail', method='@u2f.sign_on_fail'))
+                raise Exception(undefined_message.format(name='sign onFail', method='@u2f.sign_on_fail'))
 
             self.integrity_check = True
 
