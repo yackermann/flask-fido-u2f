@@ -1,4 +1,4 @@
-**Post API Documentation**
+**Flask FIDO U2F API Documentation**
 ---
 
 * **Enroll**
