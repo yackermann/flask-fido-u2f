@@ -71,12 +71,20 @@ class InjectionAndConfigTest(unittest.TestCase):
         def save():
             pass
 
-        @self.u2f.success
-        def success():
+        @self.u2f.enroll_on_success
+        def enroll_on_success():
             pass
 
-        @self.u2f.fail
-        def fail():
+        @self.u2f.enroll_on_fail
+        def enroll_on_fail():
+            pass
+
+        @self.u2f.sign_on_success
+        def sign_on_success():
+            pass
+
+        @self.u2f.sign_on_fail
+        def sign_on_fail():
             pass
 
         # All injected, should be fine now
