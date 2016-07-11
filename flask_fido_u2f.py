@@ -10,7 +10,7 @@ from u2flib_server.u2f import (start_register, complete_register, start_authenti
 
 
 class U2F():
-    def __init__(self, app, *args
+    def __init__(self, app=None, *args
         , enroll_route  = '/u2f/enroll'
         , sign_route    = '/u2f/sign'
         , devices_route = '/u2f/devices'
