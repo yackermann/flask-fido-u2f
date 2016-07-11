@@ -24,7 +24,7 @@ class InjectionAndConfigTest(unittest.TestCase):
         with self.assertRaises(Exception) as cm:
             self.u2f.verify_integrity()
 
-        self.assertIn('Read is not defined! Please import', str(cm.exception))
+        self.assertIn('handler is not defined! Please import', str(cm.exception))
 
    # ----- Adding new point of failure methods ----- #
         
@@ -59,7 +59,7 @@ class InjectionAndConfigTest(unittest.TestCase):
         with self.assertRaises(Exception) as cm:
             self.u2f.verify_integrity()
 
-        self.assertIn('is not defined! Please import', str(cm.exception))
+        self.assertIn('handler is not defined! Please import', str(cm.exception))
 
     # ----- Injecting methods ----- #
 
