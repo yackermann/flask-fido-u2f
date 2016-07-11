@@ -142,6 +142,8 @@ class U2F():
 
     def devices(self):
         """Manages users enrolled u2f devices"""
+        self.verify_integrity()
+
         if session.get('u2f_allow_device_management', False):
             if request.method == 'GET':
                 return jsonify(self.get_devices()), 200
@@ -157,6 +159,8 @@ class U2F():
 
     def facets(self):
         """Provides facets support. REQUIRES VALID HTTPS!!"""
+        self.verify_integrity()
+
         if self.FACETS_ENABLED:
             data = json.dumps({
                 'trustedFacets' : [{
@@ -176,6 +180,7 @@ class U2F():
 
     def get_enroll(self):
         """Returns new enroll seed"""
+
         devices = [DeviceRegistration.wrap(device) for device in self.get_u2f_devices()]
         enroll  = start_register(self.APPID, devices)
         enroll['status'] = 'ok'
@@ -185,6 +190,7 @@ class U2F():
 
     def verify_enroll(self, response):
         """Verifies and saves U2F enroll"""
+
         seed = session.pop('_u2f_enroll_')
 
         try:
@@ -210,7 +216,8 @@ class U2F():
 
     def get_signature_challenge(self):
         """Returns new signature challenge"""
-        devices   = [DeviceRegistration.wrap(device) for device in self.get_u2f_devices()]
+
+        devices = [DeviceRegistration.wrap(device) for device in self.get_u2f_devices()]
 
         if devices == []:
             return {
@@ -258,6 +265,7 @@ class U2F():
 
     def get_devices(self):
         """Returns list of enrolled U2F devices"""
+
         return {
             'status'  : 'ok',
             'devices' : [
@@ -272,7 +280,6 @@ class U2F():
         """Removes device specified by id"""
         
         devices = self.get_u2f_devices()
-
 
         for i in range(len(devices)):
             if devices[i]['keyHandle'] == request.id:
@@ -296,7 +303,8 @@ class U2F():
         pass
 
     def verify_counter(self, signature, counter):
-        """ Verifies that counter value is greater than previous signature"""  
+        """ Verifies that counter value is greater than previous signature""" 
+         
         devices = self.get_u2f_devices()
 
         for device in devices:
