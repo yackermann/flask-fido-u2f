@@ -2,7 +2,7 @@
 Flask-FIDO-U2F
 -------------
 
-This is the description for that library
+Flask plugin to simplify usage and management of U2F devices.
 """
 from setuptools import setup
 
