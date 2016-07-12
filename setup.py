@@ -8,7 +8,7 @@ from setuptools import setup
 
 setup(
     name                 = 'Flask-FIDO-U2F',
-    version              = '0.2',
+    version              = '0.2.1',
     url                  = 'https://github.com/herrjemand/flask-fido-u2f',
     license              = 'MIT',
     author               = 'Ackermann Yuriy',
