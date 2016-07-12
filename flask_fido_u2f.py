@@ -20,7 +20,7 @@ class U2F():
         Flask-FIDO-U2F 
         ==============
 
-        Implements easy to use U2F managing plugin.
+        Implements easy to use U2F managing plugin
 
         Arguments:
             app:
@@ -68,7 +68,7 @@ class U2F():
                 (Boolean) - A configuration key that enables FIDO U2F support. If enabled, U2F_FACETS_LIST must be set.
 
             app.config['U2F_FACETS_LIST']
-                (List) - Defines a list of FIDO applicaiton facets. For example Google facets:
+                (List) - Defines a list of FIDO application facets. For example Google facets:
 
                 [
                   "https://accounts.google.com",
