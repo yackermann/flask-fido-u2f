@@ -399,6 +399,16 @@ class U2F():
                 else:
                     return False
 
+    def reset_session(self):
+        """ Removes
+                session['u2f_enroll_authorized']
+                session['u2f_sign_required']
+                session['u2f_allow_device_management']
+            session variables.
+        """
+        session.pop('u2f_sign_required')
+        session.pop('u2f_enroll_authorized')
+        session.pop('u2f_allow_device_management')
 
 # ----- Injectors ----- #
     def read(self, func):
