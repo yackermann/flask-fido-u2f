@@ -62,6 +62,7 @@ def sign_on_fail():
 ## Docs
 
  * [API Docs](https://github.com/herrjemand/flask-fido-u2f/blob/master/docs/api.md)
+ * [Configuration Docs](https://github.com/herrjemand/flask-fido-u2f/blob/master/docs/configuration.md)
  * [FIDO U2F](https://fidoalliance.org/specifications/download/)
 
 ## License
