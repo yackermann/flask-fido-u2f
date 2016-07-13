@@ -399,6 +399,10 @@ class U2F():
                 else:
                     return False
 
+    def has_registered_devices(self):
+        """Returns if user has devices"""
+        return len(self.get_devices()) > 0
+
     def reset_session(self):
         """ Removes
                 session['u2f_enroll_authorized']
