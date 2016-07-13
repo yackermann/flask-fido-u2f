@@ -401,7 +401,7 @@ class U2F():
 
     def has_registered_devices(self):
         """Returns if user has devices"""
-        return len(self.get_devices()) > 0
+        return len(self.get_u2f_devices()) > 0
 
     def reset_session(self):
         """ Removes
