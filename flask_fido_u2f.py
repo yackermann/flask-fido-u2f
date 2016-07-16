@@ -403,16 +403,43 @@ class U2F():
         """Returns if user has devices"""
         return len(self.get_u2f_devices()) > 0
 
+# ----- Session ----- #
     def reset_session(self):
         """ Removes
-                session['u2f_enroll_authorized']
                 session['u2f_sign_required']
+                session['u2f_enroll_authorized']
                 session['u2f_device_management_authorized']
             session variables.
         """
+        self.disable_sign()
+        self.disable_enroll()
+        self.disable_device_management()
+
+    def enable_sign(self):
+        """ Sets session['u2f_sign_required'] to True """
+        session['u2f_sign_required'] = True
+
+    def enable_enroll(self):
+        """ Sets session['u2f_enroll_authorized'] to True """
+        session['u2f_enroll_authorized'] = True
+
+    def enable_device_management(self):
+        """ Sets session['u2f_device_management_authorized'] to True """
+        session['u2f_device_management_authorized'] = True
+
+
+    def disable_sign(self):
+        """ Sets session['u2f_sign_required'] to None """
         session.pop('u2f_sign_required')
+        
+    def disable_enroll(self):
+        """ Sets session['u2f_enroll_authorized'] to None """
         session.pop('u2f_enroll_authorized')
+        
+    def disable_device_management(self):
+        """ Sets session['u2f_device_management_authorized'] to None """
         session.pop('u2f_device_management_authorized')
+
 
 # ----- Injectors ----- #
     def read(self, func):
