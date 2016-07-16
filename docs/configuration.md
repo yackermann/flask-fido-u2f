@@ -29,7 +29,7 @@ Implements easy to use U2F managing plugin
 `session['u2f_sign_required']:`
  * (Boolean) - A session variable that enables access to Verification API.
 
-`session['u2f_allow_device_management']:`
+`session['u2f_device_management_authorized']:`
  * (Boolean) - A session variable that enables access to Device management API
 
 

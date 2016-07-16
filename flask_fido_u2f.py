@@ -47,7 +47,7 @@ class U2F():
             session['u2f_sign_required']:
                 (Boolean) - A session variable that enables access to Verification API.
 
-            session['u2f_allow_device_management']:
+            session['u2f_device_management_authorized']:
                 (Boolean) _ A session variable that enables access to Device management API
 
 
@@ -215,7 +215,7 @@ class U2F():
         """Manages users enrolled u2f devices"""
         self.verify_integrity()
 
-        if session.get('u2f_allow_device_management', False):
+        if session.get('u2f_device_management_authorized', False):
             if request.method == 'GET':
                 return jsonify(self.get_devices()), 200
 
@@ -407,12 +407,12 @@ class U2F():
         """ Removes
                 session['u2f_enroll_authorized']
                 session['u2f_sign_required']
-                session['u2f_allow_device_management']
+                session['u2f_device_management_authorized']
             session variables.
         """
         session.pop('u2f_sign_required')
         session.pop('u2f_enroll_authorized')
-        session.pop('u2f_allow_device_management')
+        session.pop('u2f_device_management_authorized')
 
 # ----- Injectors ----- #
     def read(self, func):

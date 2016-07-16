@@ -329,7 +329,7 @@ class APITest(unittest.TestCase):
         
         with self.client as c:
             with c.session_transaction() as sess:
-                sess['u2f_allow_device_management'] = True
+                sess['u2f_device_management_authorized'] = True
 
         # ----- No keys enrolled ----- #
 
