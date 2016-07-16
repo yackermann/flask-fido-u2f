@@ -276,6 +276,7 @@ class APITest(unittest.TestCase):
 
         self.assertGreater(response_json['counter'], old_counter)
 
+
     def test_facets(self):
         """Test U2F Facets"""
 
@@ -308,6 +309,7 @@ class APITest(unittest.TestCase):
                     'ids': self.app.config['U2F_FACETS_LIST']
                 }]
         })
+
 
     def test_device_management(self):
 
@@ -407,6 +409,11 @@ class APITest(unittest.TestCase):
         })
 
         self.assertEqual([], self.u2f_devices)
+
+
+    def test_has_registered_devices(self):
+        self.assertFalse(self.u2f.has_registered_devices())
+
 
 if __name__ == '__main__':
     unittest.main()
