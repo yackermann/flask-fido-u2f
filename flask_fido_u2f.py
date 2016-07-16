@@ -378,7 +378,7 @@ class U2F():
 
 # ----- Utilities ----- #
     def verify_certificate(self, signature):
-        """FUTURE: if enforced policy, verify certificate in public directory"""
+        """FUTURE: if enforced by policy, verify certificate in public directory"""
         pass
 
     def verify_counter(self, signature, counter):
