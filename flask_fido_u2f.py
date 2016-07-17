@@ -324,7 +324,8 @@ class U2F():
 
         if self.verify_counter(signature, counter):
             self.call_success_sign()
-
+            self.disable_sign()
+            
             return {
                 'status'  : 'ok',
                 'counter' : counter,
