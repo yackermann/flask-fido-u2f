@@ -155,14 +155,8 @@ class U2F():
             if not self.call_success_enroll:
                 raise Exception(undefined_message.format(name='enroll onSuccess', method='@u2f.enroll_on_success'))
 
-            if not self.call_fail_enroll:
-                raise Exception(undefined_message.format(name='sign onFail', method='@u2f.enroll_on_fail'))
-
             if not self.call_success_sign:
                 raise Exception(undefined_message.format(name='sign onSuccess', method='@u2f.sign_on_success'))
-
-            if not self.call_fail_sign:
-                raise Exception(undefined_message.format(name='sign onFail', method='@u2f.sign_on_fail'))
 
             self.integrity_check = True
 
@@ -267,7 +261,8 @@ class U2F():
         try:
             new_device, cert = complete_register(seed, response, self.FACETS_LIST)
         except Exception as e:
-            self.call_fail_enroll()
+            if self.call_fail_enroll:
+                self.call_fail_enroll()
 
             return {
                 'status' : 'failed', 
@@ -317,30 +312,35 @@ class U2F():
         try:
             counter, touch = verify_authenticate(devices, challenge, signature, self.FACETS_LIST)
         except Exception as e:
+            if call_fail_sign:
+                self.call_fail_sign()
+
             return {
                 'status':'failed', 
                 'error': 'Invalid signature!'
             }
-
-            self.call_fail_sign()
+        finally:
+            pass
 
         if self.verify_counter(signature, counter):
-            session['logged_in'] = True
+            self.call_success_sign()
+
             return {
                 'status'  : 'ok',
                 'counter' : counter,
                 'message': 'Successfully verified your second factor!'
             }
 
-            self.call_success_sign()
 
         else:
+            if call_fail_sign:
+                self.call_fail_sign()
+
             return {
                 'status':'failed', 
                 'error': 'Device clone detected!'
             }
 
-            self.call_fail_sign()
 
     def get_devices(self):
         """Returns list of enrolled U2F devices"""
