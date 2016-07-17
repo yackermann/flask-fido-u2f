@@ -86,20 +86,20 @@ class U2F():
 
         self.app              = app
 
+        # Routes
         self.enroll_route     = enroll_route
         self.sign_route       = sign_route
         self.devices_route    = devices_route
         self.facets_route     = facets_route
 
-        self.get_u2f_devices  = None
-        self.save_u2f_devices = None
+        # Injections
+        self.get_u2f_devices     = None
+        self.save_u2f_devices    = None
 
         self.call_success_enroll = None
         self.call_fail_enroll    = None
         self.call_success_sign   = None
         self.call_fail_sign      = None
-        self.call_success        = None
-        self.call_fail           = None
 
         # U2F Variables
         self.APPID           = None
@@ -312,7 +312,7 @@ class U2F():
         try:
             counter, touch = verify_authenticate(devices, challenge, signature, self.FACETS_LIST)
         except Exception as e:
-            if call_fail_sign:
+            if self.call_fail_sign:
                 self.call_fail_sign()
 
             return {
@@ -333,7 +333,7 @@ class U2F():
 
 
         else:
-            if call_fail_sign:
+            if self.call_fail_sign:
                 self.call_fail_sign()
 
             return {
