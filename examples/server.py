@@ -21,10 +21,10 @@ u2f_data = []
 
 @app.route('/', methods=['GET'])
 def index():
-    session['u2f_enroll_authorized']    = True
-    session['u2f_sign_required']        = True
-    session['u2f_allow_key_management'] = True
-    return 'SUP!'
+    u2f.enable_sign()
+    u2f.enable_enroll()
+    u2f.enable_device_management()
+    return 'All API methods enabled!'
 
 @u2f.read
 def read():
