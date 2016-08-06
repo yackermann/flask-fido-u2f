@@ -431,15 +431,15 @@ class U2F():
 
     def disable_sign(self):
         """ Sets session['u2f_sign_required'] to None """
-        session.pop('u2f_sign_required')
+        session.pop('u2f_sign_required', True)
         
     def disable_enroll(self):
         """ Sets session['u2f_enroll_authorized'] to None """
-        session.pop('u2f_enroll_authorized')
+        session.pop('u2f_enroll_authorized', True)
         
     def disable_device_management(self):
         """ Sets session['u2f_device_management_authorized'] to None """
-        session.pop('u2f_device_management_authorized')
+        session.pop('u2f_device_management_authorized', True)
 
 
 # ----- Injectors ----- #
