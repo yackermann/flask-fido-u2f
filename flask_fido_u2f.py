@@ -271,10 +271,13 @@ class U2F():
 
         finally:
             pass
-        
+
+        # Cutting 7 digits of precision to keep privacy
+        timestamp = int(time.time() / 10**7) * 10**7
+
         # Setting new device counter to 0
         new_device['counter']   = 0
-        new_device['timestamp'] = int(time.time())
+        new_device['timestamp'] = timestamp
 
         devices = self.__get_u2f_devices()
         devices.append(new_device)
