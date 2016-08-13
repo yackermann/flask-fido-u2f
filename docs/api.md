@@ -511,7 +511,7 @@ Deletes U2F device
 
 * **Sample Call:**
     ```javascript
-        fetch('/u2f/sign', {
+        fetch('/u2f/devices', {
             method  : 'DELETE',
             credentials : 'same-origin',
             body: JSON.stringify({
