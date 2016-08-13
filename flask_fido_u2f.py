@@ -84,58 +84,58 @@ class U2F():
             
         """
 
-        self.app              = app
+        self.app                = app
 
         # Routes
-        self.enroll_route     = enroll_route
-        self.sign_route       = sign_route
-        self.devices_route    = devices_route
-        self.facets_route     = facets_route
+        self.__enroll_route     = enroll_route
+        self.__sign_route       = sign_route
+        self.__devices_route    = devices_route
+        self.__facets_route     = facets_route
 
         # Injections
-        self.get_u2f_devices     = None
-        self.save_u2f_devices    = None
+        self.__get_u2f_devices     = None
+        self.__save_u2f_devices    = None
 
-        self.call_success_enroll = None
-        self.call_fail_enroll    = None
-        self.call_success_sign   = None
-        self.call_fail_sign      = None
+        self.__call_success_enroll = None
+        self.__call_fail_enroll    = None
+        self.__call_success_sign   = None
+        self.__call_fail_sign      = None
 
         # U2F Variables
-        self.APPID           = None
-        self.FACETS_ENABLED  = False
-        self.FACETS_LIST     = None
+        self.__appid           = None
+        self.__facets_enabled  = False
+        self.__facets_list     = None
 
-        self.integrity_check = False 
+        self.__integrity_check = False 
 
         if app is not None:
             self.init_app(app)
 
     def init_app(self, app):
-        app.add_url_rule(self.enroll_route,  view_func = self.enroll,  methods=['GET', 'POST'])
-        app.add_url_rule(self.sign_route,    view_func = self.sign,    methods=['GET', 'POST'])
-        app.add_url_rule(self.devices_route, view_func = self.devices, methods=['GET', 'DELETE'])
-        app.add_url_rule(self.facets_route,  view_func = self.facets,  methods=['GET'])
+        app.add_url_rule(self.__enroll_route,  view_func = self.enroll,  methods=['GET', 'POST'])
+        app.add_url_rule(self.__sign_route,    view_func = self.sign,    methods=['GET', 'POST'])
+        app.add_url_rule(self.__devices_route, view_func = self.devices, methods=['GET', 'DELETE'])
+        app.add_url_rule(self.__facets_route,  view_func = self.facets,  methods=['GET'])
 
-        self.APPID            = self.app.config.get('U2F_APPID', None)
-        self.FACETS_ENABLED   = self.app.config.get('U2F_FACETS_ENABLED', False)
-        self.FACETS_LIST      = self.app.config.get('U2F_FACETS_LIST', [])
+        self.__appid            = self.app.config.get('U2F_APPID', None)
+        self.__facets_enabled   = self.app.config.get('U2F_FACETS_ENABLED', False)
+        self.__facets_list      = self.app.config.get('U2F_FACETS_LIST', [])
 
         # Set appid to appid + /facets.json if U2F_FACETS_ENABLED
         # or U2F_APP becomes U2F_FACETS_LIST
-        if self.FACETS_ENABLED:
-            self.APPID += '/facets.json'
+        if self.__facets_enabled:
+            self.__appid += '/facets.json'
         else:
-            self.FACETS_LIST = [self.APPID]
+            self.__facets_list = [self.__appid]
 
 
     def verify_integrity(self):
         """Verifies that all required functions been injected."""
-        if not self.integrity_check:
-            if not self.APPID:
+        if not self.__integrity_check:
+            if not self.__appid:
                 raise Exception('U2F_APPID was not defined! Please define it in configuration file.')
 
-            if self.FACETS_ENABLED and not len(self.FACETS_LIST):
+            if self.__facets_enabled and not len(self.__facets_list):
                 raise Exception("""U2F facets been enabled, but U2F facet list is empty.
                                    Please either disable facets by setting U2F_FACETS_ENABLED to False.
                                    Or add facets list using, by assigning it to U2F_FACETS_LIST.
@@ -145,20 +145,20 @@ class U2F():
             
             undefined_message = 'U2F {name} handler is not defined! Please import {name} through {method}!'
 
-            if not self.get_u2f_devices:
+            if not self.__get_u2f_devices:
                 raise Exception(undefined_message.format(name='Read', method='@u2f.read'))
 
-            if not self.save_u2f_devices:
+            if not self.__save_u2f_devices:
                 raise Exception(undefined_message.format(name='Save', method='@u2f.save'))
 
 
-            if not self.call_success_enroll:
+            if not self.__call_success_enroll:
                 raise Exception(undefined_message.format(name='enroll onSuccess', method='@u2f.enroll_on_success'))
 
-            if not self.call_success_sign:
+            if not self.__call_success_sign:
                 raise Exception(undefined_message.format(name='sign onSuccess', method='@u2f.sign_on_success'))
 
-            self.integrity_check = True
+            self.__integrity_check = True
 
         return True
 
@@ -227,11 +227,11 @@ class U2F():
         """Provides facets support. REQUIRES VALID HTTPS!"""
         self.verify_integrity()
 
-        if self.FACETS_ENABLED:
+        if self.__facets_enabled:
             data = json.dumps({
                 'trustedFacets' : [{
                     'version': { 'major': 1, 'minor' : 0 },
-                    'ids': self.FACETS_LIST
+                    'ids': self.__facets_list
                 }]
             }, sort_keys=True, indent=2, separators=(',', ': '))
 
@@ -247,8 +247,8 @@ class U2F():
     def get_enroll(self):
         """Returns new enroll seed"""
 
-        devices = [DeviceRegistration.wrap(device) for device in self.get_u2f_devices()]
-        enroll  = start_register(self.APPID, devices)
+        devices = [DeviceRegistration.wrap(device) for device in self.__get_u2f_devices()]
+        enroll  = start_register(self.__appid, devices)
         enroll['status'] = 'ok'
 
         session['_u2f_enroll_'] = enroll.json
@@ -259,10 +259,10 @@ class U2F():
 
         seed = session.pop('_u2f_enroll_')
         try:
-            new_device, cert = complete_register(seed, response, self.FACETS_LIST)
+            new_device, cert = complete_register(seed, response, self.__facets_list)
         except Exception as e:
-            if self.call_fail_enroll:
-                self.call_fail_enroll()
+            if self.__call_fail_enroll:
+                self.__call_fail_enroll()
 
             return {
                 'status' : 'failed', 
@@ -276,11 +276,11 @@ class U2F():
         new_device['counter']   = 0
         new_device['timestamp'] = int(time.time())
 
-        devices = self.get_u2f_devices()
+        devices = self.__get_u2f_devices()
         devices.append(new_device)
-        self.save_u2f_devices(devices)
+        self.__save_u2f_devices(devices)
         
-        self.call_success_enroll()
+        self.__call_success_enroll()
 
         return {'status': 'ok', 'message': 'Successfully enrolled new U2F device!'}
 
@@ -288,7 +288,7 @@ class U2F():
     def get_signature_challenge(self):
         """Returns new signature challenge"""
 
-        devices = [DeviceRegistration.wrap(device) for device in self.get_u2f_devices()]
+        devices = [DeviceRegistration.wrap(device) for device in self.__get_u2f_devices()]
 
         if devices == []:
             return {
@@ -306,14 +306,14 @@ class U2F():
     def verify_signature(self, signature):
         """Verifies signature"""
 
-        devices   = [DeviceRegistration.wrap(device) for device in self.get_u2f_devices()]
+        devices   = [DeviceRegistration.wrap(device) for device in self.__get_u2f_devices()]
         challenge = session.pop('_u2f_challenge_')
 
         try:
-            counter, touch = verify_authenticate(devices, challenge, signature, self.FACETS_LIST)
+            counter, touch = verify_authenticate(devices, challenge, signature, self.__facets_list)
         except Exception as e:
-            if self.call_fail_sign:
-                self.call_fail_sign()
+            if self.__call_fail_sign:
+                self.__call_fail_sign()
 
             return {
                 'status':'failed', 
@@ -323,7 +323,7 @@ class U2F():
             pass
 
         if self.verify_counter(signature, counter):
-            self.call_success_sign()
+            self.__call_success_sign()
             self.disable_sign()
             
             return {
@@ -334,8 +334,8 @@ class U2F():
 
 
         else:
-            if self.call_fail_sign:
-                self.call_fail_sign()
+            if self.__call_fail_sign:
+                self.__call_fail_sign()
 
             return {
                 'status':'failed', 
@@ -352,19 +352,19 @@ class U2F():
                 {
                     'id'        : device['keyHandle'],
                     'timestamp' : device['timestamp']
-                } for device in self.get_u2f_devices()
+                } for device in self.__get_u2f_devices()
             ]
         }
 
     def remove_device(self, request):
         """Removes device specified by id"""
         
-        devices = self.get_u2f_devices()
+        devices = self.__get_u2f_devices()
 
         for i in range(len(devices)):
             if devices[i]['keyHandle'] == request['id']:
                 del devices[i]
-                self.save_u2f_devices(devices)
+                self.__save_u2f_devices(devices)
                 
                 return {
                     'status'  : 'ok', 
@@ -385,7 +385,7 @@ class U2F():
     def verify_counter(self, signature, counter):
         """ Verifies that counter value is greater than previous signature""" 
 
-        devices = self.get_u2f_devices()
+        devices = self.__get_u2f_devices()
 
         for device in devices:
             # Searching for specific keyhandle
@@ -394,7 +394,7 @@ class U2F():
                     
                     # Updating counter record
                     device['counter'] = counter
-                    self.save_u2f_devices(devices)
+                    self.__save_u2f_devices(devices)
                     
                     return True
                 else:
@@ -402,7 +402,7 @@ class U2F():
 
     def has_registered_devices(self):
         """Returns if user has devices"""
-        return len(self.get_u2f_devices()) > 0
+        return len(self.__get_u2f_devices()) > 0
 
 # ----- Session ----- #
     def reset_session(self):
@@ -445,24 +445,24 @@ class U2F():
 # ----- Injectors ----- #
     def read(self, func):
         """Injects read function that reads and returns U2F object"""
-        self.get_u2f_devices = func
+        self.__get_u2f_devices = func
 
     def save(self, func):
         """Injects save function that takes U2F object and saves it"""
-        self.save_u2f_devices = func
+        self.__save_u2f_devices = func
 
     def enroll_on_success(self, func):
         """Injects function that would be called on successfull enrollment"""
-        self.call_success_enroll = func
+        self.__call_success_enroll = func
 
     def enroll_on_fail(self, func):
         """Injects function that would be called on enrollment failure"""
-        self.call_fail_enroll = func
+        self.__call_fail_enroll = func
 
     def sign_on_success(self, func):
         """Injects function that would be called on successfull U2F authentication"""
-        self.call_success_sign = func
+        self.__call_success_sign = func
 
     def sign_on_fail(self, func):
         """Injects function that would be called on U2F authentication failure"""
-        self.call_fail_sign = func
+        self.__call_fail_sign = func
