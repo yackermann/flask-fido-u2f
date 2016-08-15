@@ -412,12 +412,12 @@ Gets list of your U2F devices
             status  : "ok",
             devices : [
                 {
-                    id        : "Jo_q_IxHKq5AzEheueRVrzltnVDOqjbGD2Z...",
-                    timestamp : 1468145352
+                    id    : "Jo_q_IxHKq5AzEheueRVrzltnVDOqjbGD2Z...",
+                    index : 0
                 },
                 {
-                    id        : "bmmSN2Ur8vT4LpoQuVLx5avRfo17ZZzVjxr...",
-                    timestamp : 1468121632
+                    id    : "bmmSN2Ur8vT4LpoQuVLx5avRfo17ZZzVjxr...",
+                    index : 2
                 }
                 ...
             ]
