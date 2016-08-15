@@ -4,7 +4,6 @@ Flask-FIDO-U2F
 
 Flask plugin to simplify usage and management of U2F devices.
 """
-import os
 from setuptools import setup
 
 # Utility function to read the README file.
@@ -12,9 +11,10 @@ from setuptools import setup
 # README file and 2) it's easier to type in the README file than to put a raw
 # string in below ...
 # https://pythonhosted.org/an_example_pypi_project/setuptools.html
-def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
+def read(filename):
+    with open(filename) as r:
+        return r.read()
 
 setup(
     name                 = 'Flask-FIDO-U2F',
