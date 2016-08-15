@@ -1,4 +1,4 @@
-import json, time
+import json
 
 # Flask imports
 from flask import jsonify, session
@@ -272,15 +272,20 @@ class U2F():
         finally:
             pass
 
-        # Cutting 7 digits of precision to keep privacy
-        timestamp = int(time.time() / 10**7) * 10**7
-
-        # Setting new device counter to 0
-        new_device['counter']   = 0
-        new_device['timestamp'] = timestamp
+        
 
         devices = self.__get_u2f_devices()
+
+        # Setting new device counter to 0
+        new_device['counter'] = 0
+        new_device['index']   = 0
+
+        for device in devices:
+            if new_device['index'] <= device['index']:
+                new_device['index'] = device['index'] + 1
+
         devices.append(new_device)
+
         self.__save_u2f_devices(devices)
         
         self.__call_success_enroll()
@@ -353,8 +358,8 @@ class U2F():
             'status'  : 'ok',
             'devices' : [
                 {
-                    'id'        : device['keyHandle'],
-                    'timestamp' : device['timestamp']
+                    'id'    : device['keyHandle'],
+                    'index' : device['index']
                 } for device in self.__get_u2f_devices()
             ]
         }

@@ -142,7 +142,7 @@ class APITest(unittest.TestCase):
         # ----- Testing U2F device format ----- #
         u2f_device = {
             'keyHandle' : str,
-            'timestamp' : int,
+            'index'     : int,
             'publicKey' : str,
             'counter'   : int,
             'appId'     : str
@@ -372,8 +372,8 @@ class APITest(unittest.TestCase):
         device = response_json['devices'][0]
 
         device_model = {
-            'id'        : str,
-            'timestamp' : int
+            'id'    : str,
+            'index' : int
         }
 
         self.assertTrue(all(type(device[key]) == device_model[key] for key in device_model.keys()))
