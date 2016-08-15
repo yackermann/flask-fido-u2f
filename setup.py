@@ -18,7 +18,7 @@ def read(fname):
 
 setup(
     name                 = 'Flask-FIDO-U2F',
-    version              = '0.4.1',
+    version              = '0.4.2',
     url                  = 'https://github.com/herrjemand/flask-fido-u2f',
     license              = 'MIT',
     author               = 'Ackermann Yuriy',
