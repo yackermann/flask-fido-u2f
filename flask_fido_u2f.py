@@ -262,7 +262,7 @@ class U2F():
             new_device, cert = complete_register(seed, response, self.__facets_list)
         except Exception as e:
             if self.__call_fail_enroll:
-                self.__call_fail_enroll()
+                self.__call_fail_enroll(e)
 
             return {
                 'status' : 'failed', 
@@ -321,7 +321,7 @@ class U2F():
             counter, touch = verify_authenticate(devices, challenge, signature, self.__facets_list)
         except Exception as e:
             if self.__call_fail_sign:
-                self.__call_fail_sign()
+                self.__call_fail_sign(e)
 
             return {
                 'status':'failed', 
