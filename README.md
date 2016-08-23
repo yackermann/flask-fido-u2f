@@ -34,8 +34,9 @@ def enroll_on_success():
     pass
 
 @u2f.enroll_on_fail
-def enroll_on_fail():
-    # Executes on failed U2F enroll
+def enroll_on_fail(e):
+    # Executes on U2F enroll fail
+    # Takes argument e - exception raised
     pass
 
 @u2f.sign_on_success
@@ -44,8 +45,9 @@ def sign_on_success():
     pass
 
 @u2f.sign_on_fail
-def sign_on_fail():
-    # Executes on failed U2F authentication
+def sign_on_fail(e):
+    # Executes on U2F sign fail
+    # Takes argument e - exception raised
     pass
 ```
 
