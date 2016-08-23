@@ -9,6 +9,9 @@
     * [Get challenge](#get-challenge)
     * [Verify signature](#verify-signature)
 
+* **Facets**
+    * [Get facets](#get-facets)
+
 * **U2F device management**
     * [Get devices](#get-devices)
     * [Delete device](#delete-device)
@@ -377,6 +380,73 @@ Verifies users signature
         }).catch(function (err) {
             console.log({ 'status': 'failed', 'error': err });
         })
+    ```
+
+
+
+Facets
+___
+
+**Gets facets**
+----
+Get U2F enroll seed
+
+* **URL**
+
+    * `/u2f/facets.json`
+
+* **Method:**
+
+     * `GET`
+    
+*  **URL Params**
+
+    * None
+
+* **Data Params**
+
+    * None
+
+* **Success Response:**
+
+    * **Code:** 200 OK
+
+        ```javascript
+        {
+            trustedFacets: [
+                {
+                    version: { major: 1, minor: 0 },
+                    ids: [
+                        "https://mail.example.com",
+                        "https://secure.example.com"
+                    ]
+                }
+            ]
+        }
+        ```
+ 
+* **Error Response:**
+
+    * **Code:** 404 NOT FOUND - Facets are disabled
+
+        ```javascript
+        {}
+        ```
+
+* **Sample Call:**
+
+    ```javascript
+        fetch('/u2f/facets.json', {
+            method  : 'GET',
+            credentials : 'same-origin',
+            headers : {
+                'Accept'       : 'application/json',
+                'Content-Type' : 'application/json'
+            }
+        })
+        .then((response) => response.json())
+        .then((response) => console.log(response))
+        .catch((error) => console.log({ 'status': 'failed', 'error': err }))
     ```
 
 
