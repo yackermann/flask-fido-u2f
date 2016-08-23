@@ -124,7 +124,7 @@ class U2F():
         # Set appid to appid + /facets.json if U2F_FACETS_ENABLED
         # or U2F_APP becomes U2F_FACETS_LIST
         if self.__facets_enabled:
-            self.__appid += '/facets.json'
+            self.__appid += self.__facets_route
         else:
             self.__facets_list = [self.__appid]
 
