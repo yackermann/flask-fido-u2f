@@ -1,5 +1,13 @@
-flask-fido-u2f
+**DEPRECATED** flask-fido-u2f **DEPRECATED**
 ---
+
+**DEPRECATED** **DEPRECATED** **DEPRECATED** **DEPRECATED** **DEPRECATED**
+
+
+PLEASE TAKE A LOOK AT [WEBAUTHN API](https://w3c.github.io/webauthn/#CreateCred-DetermineRpId)
+
+MORE RESOURCES [WEBAUTHN-AWESOME](https://github.com/herrjemand/awesome-webauthn)
+
 
 Flask plugin to simplify usage and management of U2F devices.
 
